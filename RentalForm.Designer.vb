@@ -162,7 +162,8 @@ Partial Class RentalForm
         Me.DaysLabel.Size = New System.Drawing.Size(106, 16)
         Me.DaysLabel.TabIndex = 14
         Me.DaysLabel.Text = "Number Of Days"
-        Me.RentalFormToolTip.SetToolTip(Me.DaysLabel, "The Amount Of Days The Customer Has Rented The Vehicle")
+        Me.RentalFormToolTip.SetToolTip(Me.DaysLabel, "The Amount Of Days The Customer Has Rented The Vehicle (Must be greater than 0 an" &
+        "d less than 45 days).")
         '
         'NameTextBox
         '
@@ -314,6 +315,7 @@ Partial Class RentalForm
         Me.CalculateButton.Size = New System.Drawing.Size(100, 28)
         Me.CalculateButton.TabIndex = 10
         Me.CalculateButton.Text = "&Calculate"
+        Me.RentalFormToolTip.SetToolTip(Me.CalculateButton, "Accumulates Customer Data and Stores/Displays It")
         Me.CalculateButton.UseVisualStyleBackColor = True
         '
         'ClearButton
