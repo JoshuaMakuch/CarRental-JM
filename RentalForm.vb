@@ -45,29 +45,55 @@ Public Class RentalForm
 
     'What happens when the user submits their information and also validates that the inputs are correct
     Sub Calculate()
-        'Adds all customer data to an array
+        'Adds all input text boxs to an array to work with
         Dim inputTextBoxes() As TextBox = {NameTextBox, AddressTextBox, CityTextBox, StateTextBox, ZipCodeTextBox,
             BeginOdometerTextBox, EndOdometerTextBox, DaysTextBox}
+        'What to display in a message to the user
+        Dim messageInfo As String = ""
 
-        'Checks the user has input at least something into all fields.
-        For Each tb As TextBox In inputTextBoxes
-            If tb.Text.Trim().Length = 0 Then
-                MessageBox.Show("You must enter a value for all fields.")
-                tb.Focus()
-                Return
-            End If
-            If tb Is DaysTextBox Then
+        'Checks the user has input at least something in all fields from the end to the beginning tab order
+        For i As Integer = inputTextBoxes.Count - 1 To 0 Step -1
+
+            'Assumes the input is valid
+            inputTextBoxes(i).BackColor = Color.LightGreen
+
+            'Checks to make sure there is something in the user's input for that specific text box, if not, display and hightlight
+            If inputTextBoxes(i).Text.Trim().Length = 0 Then
+                messageInfo = $"{messageInfo}{vbCrLf}{inputTextBoxes(i).Name} is empty."
+                inputTextBoxes(i).BackColor = Color.LightPink
+                inputTextBoxes(i).Focus()
+            ElseIf inputTextBoxes(i) Is EndOdometerTextBox Then
                 Try
-                    If CInt(DaysTextBox.Text) <= 0 Or CInt(DaysTextBox.Text) > 45 Then
-                        MessageBox.Show("Please input a valid amount of days (0 to 45 days).")
-                        tb.Focus()
-                        Return
+                    If CDbl(EndOdometerTextBox.Text) > CDbl(BeginOdometerTextBox.Text) Then
+                        messageInfo = $"{messageInfo}{vbCrLf}{inputTextBoxes(i).Name} is not a possible amount."
+                        inputTextBoxes(i).BackColor = Color.LightPink
+                        inputTextBoxes(i).Focus()
                     End If
                 Catch ex As Exception
-                    MessageBox.Show("Please input a valid amount of days (0 to 45 days).")
+                    messageInfo = $"{messageInfo}{vbCrLf}{inputTextBoxes(i).Name} is an invalid value."
+                    inputTextBoxes(i).BackColor = Color.LightPink
+                    inputTextBoxes(i).Focus()
+                End Try
+            ElseIf inputTextBoxes(i) Is DaysTextBox Then
+                Try
+                    If CInt(inputTextBoxes(i).Text) <= 0 Or CInt(inputTextBoxes(i).Text) > 45 Then
+                        messageInfo = $"{messageInfo}{vbCrLf}{inputTextBoxes(i).Name} is an invalid amount."
+                        inputTextBoxes(i).BackColor = Color.LightPink
+                        inputTextBoxes(i).Focus()
+                    End If
+                Catch ex As Exception
+                    messageInfo = $"{messageInfo}{vbCrLf}{inputTextBoxes(i).Name} is an invalid value."
+                    inputTextBoxes(i).BackColor = Color.LightPink
+                    inputTextBoxes(i).Focus()
                 End Try
             End If
+
         Next
+
+        'Displays a message box if the input data is wrong
+        If messageInfo IsNot "" Then
+            MessageBox.Show($"Identified Issues:{vbCrLf}{messageInfo}")
+        End If
 
     End Sub
 
