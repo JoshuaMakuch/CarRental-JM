@@ -10,9 +10,10 @@ Option Compare Binary
 'Things to do:
 'Code for just one customer and accumulate all the necessary data, validate, and then display
 
-Imports System.Data.OleDb
-
 Public Class RentalForm
+    Dim sumCustomers As Integer
+    Dim sumMilesDriven As Integer
+    Dim sumCharges As Double
 
     'Asks the user if they want to exit the program and does an appropriate reaction
     Private Sub ExitButton_Click(sender As Object, e As EventArgs) Handles ExitButton.Click
@@ -21,32 +22,55 @@ Public Class RentalForm
         End If
     End Sub
 
-    'Asks the user if they want to exit the program and does an appropriate reaction but for the Tool Strip Menu
+    'Menu Strip exit button
     Private Sub ExitToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem1.Click
         ExitButton_Click(sender, e)
     End Sub
 
-    'What happens when the user clicks the clear button
+    'Clear button
     Private Sub ClearButton_Click(sender As Object, e As EventArgs) Handles ClearButton.Click
 
         'Assures the user wants to clear all data
-        If MessageBox.Show("Do you want to clear all data?", "Clear Data?", MessageBoxButtons.YesNo) = DialogResult.Yes Then
+        If MessageBox.Show("Do you want to clear all but summary data?", "Clear Data?", MessageBoxButtons.YesNo) = DialogResult.Yes Then
+            'Adds all input text boxs to an array to work with
+            Dim inputTextBoxes() As TextBox = {NameTextBox, AddressTextBox, CityTextBox, StateTextBox, ZipCodeTextBox,
+            BeginOdometerTextBox, EndOdometerTextBox, DaysTextBox}
+            Dim tb As TextBox
+            For i As Integer = inputTextBoxes.Count - 1 To 0 Step -1
+                'Resets appropriate textboxes
+                tb = inputTextBoxes(i)
+                tb.Text = ""
+                tb.BackColor = Color.LightPink
+            Next
+            TotalMilesTextBox.Text = ""
+            MileageChargeTextBox.Text = ""
+            DayChargeTextBox.Text = ""
+            TotalDiscountTextBox.Text = ""
+            TotalChargeTextBox.Text = ""
+            MilesradioButton.Checked = True
+            AAAcheckbox.Checked = False
+            Seniorcheckbox.Checked = False
 
         End If
 
     End Sub
 
-    'What happens when the user presses the calculate button
+    'Menu strip clear button
+    Private Sub ClearToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ClearToolStripMenuItem1.Click
+        ClearButton_Click(sender, e)
+    End Sub
+
+    'Calculate button
     Private Sub CalculateButton_Click(sender As Object, e As EventArgs) Handles CalculateButton.Click
-        'Adds all input text boxs to an array to work with
-        Dim inputTextBoxes() As TextBox = {NameTextBox, AddressTextBox, CityTextBox, StateTextBox, ZipCodeTextBox,
-            BeginOdometerTextBox, EndOdometerTextBox, DaysTextBox}
         'What to display in a message to the user
         Dim messageInfo As String = ""
         'Creates a new variable to work with to reduce using the same "inputTextBoxes(i)" over and over again and for validation
-        Dim tb As TextBox
         Dim validInput As Boolean
         Dim allValid As Boolean = True
+        'Adds all input text boxs to an array to work with
+        Dim inputTextBoxes() As TextBox = {NameTextBox, AddressTextBox, CityTextBox, StateTextBox, ZipCodeTextBox,
+            BeginOdometerTextBox, EndOdometerTextBox, DaysTextBox}
+        Dim tb As TextBox
 
         'Checks the user has input at least something in all fields from the end to the beginning tab order
         For i As Integer = inputTextBoxes.Count - 1 To 0 Step -1
@@ -130,14 +154,32 @@ Public Class RentalForm
                 TotalDiscountTextBox.Text = Format(0, "Currency")
             End If 'If there is no discount
 
+            'Adds to the summary
+            sumCustomers += 1
+            sumMilesDriven = sumMilesDriven + CInt(DaysTextBox.Text)
+            sumCharges = sumCharges + CDbl(TotalChargeTextBox.Text)
+
         End If
 
     End Sub
 
-    'What happens when the user presses the menu strip calculate button
+    'Menu strip calculate button
     Private Sub CalculateToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CalculateToolStripMenuItem.Click
-        'Runs the calculate function when the menu strip item is clicked
         CalculateButton_Click(sender, e)
+    End Sub
+
+    'Summary button
+    Private Sub SummaryButton_Click(sender As Object, e As EventArgs) Handles SummaryButton.Click
+
+        'Formats and displays totals
+        MessageBox.Show($"Total Customers: {sumCustomers}{vbCrLf}Total Miles Driven: {sumMilesDriven}
+Total Charges: {Format(sumCharges, "Currency")}", "Detailed Summary?", MessageBoxButtons.OK)
+
+    End Sub
+
+    'Menu strip summary button
+    Private Sub SummaryToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles SummaryToolStripMenuItem1.Click
+        SummaryButton_Click(sender, e)
     End Sub
 
 End Class
