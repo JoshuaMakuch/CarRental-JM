@@ -1,4 +1,7 @@
-﻿'Joshua Makuch
+﻿Option Explicit On
+Option Strict On
+Option Compare Binary
+'Joshua Makuch
 'RCET 0265
 'Spring 2023
 'Car Rental Form Fork
@@ -7,9 +10,7 @@
 'Things to do:
 'Code for just one customer and accumulate all the necessary data, validate, and then display
 
-Option Explicit On
-Option Strict On
-Option Compare Binary
+Imports System.Data.OleDb
 
 Public Class RentalForm
 
@@ -44,12 +45,13 @@ Public Class RentalForm
         Dim messageInfo As String = ""
         'Creates a new variable to work with to reduce using the same "inputTextBoxes(i)" over and over again and for validation
         Dim tb As TextBox
-        Dim validInput As Boolean = True
+        Dim validInput As Boolean
+        Dim allValid As Boolean = True
 
         'Checks the user has input at least something in all fields from the end to the beginning tab order
         For i As Integer = inputTextBoxes.Count - 1 To 0 Step -1
 
-            'Resets each variable
+            'Resets appropriate variables
             tb = inputTextBoxes(i)
             validInput = True
 
@@ -58,7 +60,7 @@ Public Class RentalForm
                 validInput = False
             ElseIf tb Is BeginOdometerTextBox Or tb Is EndOdometerTextBox Then
                 Try
-                    If CInt(BeginOdometerTextBox.Text) > CInt(EndOdometerTextBox.Text) Then
+                    If CInt(BeginOdometerTextBox.Text) > CInt(EndOdometerTextBox.Text) Or CInt(BeginOdometerTextBox.Text) < 0 Then
                         validInput = False
                     End If
                 Catch ex As Exception
@@ -82,14 +84,54 @@ Public Class RentalForm
                 tb.BackColor = Color.LightPink
                 tb.Focus()
                 tb.Text = ""
+                allValid = False
             End If
 
         Next
 
         'Displays a message box if the input data is wrong
-        If messageInfo IsNot "" Then
+        If Not allValid Then
             MessageBox.Show($"Identified Issues:{vbCrLf}{messageInfo}")
         End If
+
+        'If all the inputs are valid and hasn't made an error than it will continue on with the calculations
+        If allValid Then
+
+            'Checks if the input values are in miles or kilometers and procceeds with the calculations
+            If KilometersradioButton.Checked Then
+                TotalMilesTextBox.Text = CStr(0.62 * (CInt(EndOdometerTextBox.Text) - CInt(BeginOdometerTextBox.Text))) 'Distance driven in Mi. converted from Km.
+            Else
+                TotalMilesTextBox.Text = CStr((CInt(EndOdometerTextBox.Text) - CInt(BeginOdometerTextBox.Text))) 'Distance driven in Mi.
+            End If
+
+            'Applies mileage charge depending on what the reading is.
+            If CInt(TotalMilesTextBox.Text) > 500 Then 'miles > 500
+                MileageChargeTextBox.Text = Format((CInt(TotalMilesTextBox.Text) * 0.1), "Currency")
+            ElseIf CInt(TotalMilesTextBox.Text) >= 201 And CInt(TotalMilesTextBox.Text) <= 500 Then '200 < miles < 500
+                MileageChargeTextBox.Text = Format((CInt(TotalMilesTextBox.Text) * 0.12), "Currency")
+            Else 'Assumes miles < 200
+                MileageChargeTextBox.Text = Format(0, "Currency")
+            End If
+
+            'Submits the days and initial total charge
+            DayChargeTextBox.Text = Format((CInt(DaysTextBox.Text) * 15), "Currency")
+            TotalChargeTextBox.Text = Format(((CDbl(MileageChargeTextBox.Text) + CInt(DayChargeTextBox.Text))), "Currency")
+
+            'Applies Discounts
+            If AAAcheckbox.Checked Then 'If AAA, find total and subtract the 
+                TotalDiscountTextBox.Text = Format((0.05 * CDbl(TotalChargeTextBox.Text)), "Currency")
+                TotalChargeTextBox.Text = Format((0.95 * CDbl(TotalChargeTextBox.Text)), "Currency")
+            End If
+            If Seniorcheckbox.Checked Then ' If Senior, find total and subtract the discount
+                TotalDiscountTextBox.Text = Format(((0.03 * CDbl(TotalChargeTextBox.Text)) + CDbl(TotalDiscountTextBox.Text)), "Currency")
+                TotalChargeTextBox.Text = Format((0.97 * CDbl(TotalChargeTextBox.Text)), "Currency")
+            End If
+            If Not AAAcheckbox.Checked And Not Seniorcheckbox.Checked Then
+                TotalDiscountTextBox.Text = Format(0, "Currency")
+            End If 'If there is no discount
+
+        End If
+
     End Sub
 
     'What happens when the user presses the menu strip calculate button
