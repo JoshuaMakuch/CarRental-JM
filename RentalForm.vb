@@ -142,15 +142,16 @@ Public Class RentalForm
             TotalChargeTextBox.Text = Format(((CDbl(MileageChargeTextBox.Text) + CInt(DayChargeTextBox.Text))), "Currency")
 
             'Applies Discounts
-            If AAAcheckbox.Checked Then 'If AAA, find total and subtract the 
+            If AAAcheckbox.Checked And Not Seniorcheckbox.Checked Then 'If AAA, find total and subtract the discount
                 TotalDiscountTextBox.Text = Format((0.05 * CDbl(TotalChargeTextBox.Text)), "Currency")
                 TotalChargeTextBox.Text = Format((0.95 * CDbl(TotalChargeTextBox.Text)), "Currency")
-            End If
-            If Seniorcheckbox.Checked Then ' If Senior, find total and subtract the discount
-                TotalDiscountTextBox.Text = Format(((0.03 * CDbl(TotalChargeTextBox.Text)) + CDbl(TotalDiscountTextBox.Text)), "Currency")
+            ElseIf Seniorcheckbox.Checked And Not AAAcheckbox.Checked Then ' If Senior, find total and subtract the discount
+                TotalDiscountTextBox.Text = Format(((0.03 * CDbl(TotalChargeTextBox.Text))), "Currency")
                 TotalChargeTextBox.Text = Format((0.97 * CDbl(TotalChargeTextBox.Text)), "Currency")
-            End If
-            If Not AAAcheckbox.Checked And Not Seniorcheckbox.Checked Then
+            ElseIf Seniorcheckbox.Checked And AAAcheckbox.Checked Then 'If Senior and AAA, find total and subtract the discount
+                TotalDiscountTextBox.Text = Format(((0.08 * CDbl(TotalChargeTextBox.Text))), "Currency")
+                TotalChargeTextBox.Text = Format((0.92 * CDbl(TotalChargeTextBox.Text)), "Currency")
+            ElseIf Not AAAcheckbox.Checked And Not Seniorcheckbox.Checked Then 'If neither of these are checked
                 TotalDiscountTextBox.Text = Format(0, "Currency")
             End If 'If there is no discount
 
